@@ -1,5 +1,8 @@
 package it.gbresciani.stargazers.ui;
 
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
+import com.jakewharton.retrofit2.adapter.rxjava2.Result;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -13,8 +16,9 @@ import io.reactivex.schedulers.Schedulers;
 import it.gbresciani.stargazers.network.Stargazer;
 import it.gbresciani.stargazers.network.StargazersService;
 import okhttp3.Headers;
+import okhttp3.MediaType;
+import okhttp3.ResponseBody;
 import retrofit2.Response;
-import retrofit2.adapter.rxjava.Result;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -69,6 +73,19 @@ public class StargazersPresenterTest {
 
         // Assert...
         verify(stargazersViewMock).showStargazers(stargazers, true);
+    }
+
+    @Test
+    public void onDataEntered_shouldCallRightViewMethods_whenNetworkResponseIsA404() throws Exception {
+        // When...
+        when(stargazersServiceMock.getStargazers(owner, repo))
+                .thenReturn(Observable.error(new HttpException(Response.error(404, ResponseBody.create(MediaType.parse("application/json"), "")))));
+
+        // Return...
+        stargazersPresenter.onDataEntered(owner, repo);
+
+        // Assert...
+        verify(stargazersViewMock).showEmptyView();
     }
 
     @Test

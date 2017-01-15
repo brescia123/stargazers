@@ -1,5 +1,8 @@
 package it.gbresciani.stargazers.ui;
 
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
+import com.jakewharton.retrofit2.adapter.rxjava2.Result;
+
 import java.util.List;
 
 import io.reactivex.Scheduler;
@@ -8,7 +11,6 @@ import io.reactivex.schedulers.Schedulers;
 import it.gbresciani.stargazers.network.LinkHeaderParser;
 import it.gbresciani.stargazers.network.Stargazer;
 import it.gbresciani.stargazers.network.StargazersService;
-import retrofit2.adapter.rxjava.Result;
 
 public class StargazersPresenter {
 
@@ -63,6 +65,10 @@ public class StargazersPresenter {
     }
 
     private void onError(Throwable t) {
-        view.showError();
+        if (t instanceof HttpException && ((HttpException) t).code() == 404) {
+            view.showEmptyView();
+        } else {
+            view.showError();
+        }
     }
 }
