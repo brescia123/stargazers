@@ -4,6 +4,9 @@ package it.gbresciani.stargazers.network;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Data class representing a Stargazer.
+ */
 public class Stargazer {
 
     @Expose @SerializedName("login") private final String login;

@@ -7,7 +7,6 @@ import java.util.List;
 import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
-import retrofit2.http.Query;
 import retrofit2.http.Url;
 
 public interface StargazersService {
@@ -15,11 +14,6 @@ public interface StargazersService {
     @GET("repos/{owner}/{repo}/stargazers")
     Observable<Result<List<Stargazer>>> getStargazers(@Path("owner") String owner,
                                                       @Path("repo") String repo);
-
-    @GET("repos/{owner}/{repo}/stargazers")
-    Observable<Result<List<Stargazer>>> getStargazers(@Path("owner") String owner,
-                                                      @Path("repo") String repo,
-                                                      @Query("page") Integer page);
 
     @GET
     Observable<Result<List<Stargazer>>> getStargazers(@Url String stargazersUrl);

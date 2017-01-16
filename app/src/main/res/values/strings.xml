@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Stargazers</string>
+    <string name="user">User</string>
+    <string name="repo">Repository</string>
+    <string name="no_results">No results</string>
+    <string name="msg_insert_username">Insert a username</string>
+    <string name="msg_insert_repo">Insert a repository name</string>
+    <string name="msg_error">There was an error, Retry.</string>
 </resources>
