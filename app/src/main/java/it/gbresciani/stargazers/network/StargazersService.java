@@ -21,6 +21,6 @@ public interface StargazersService {
                                                       @Path("repo") String repo,
                                                       @Query("page") Integer page);
 
-    @GET("repos/{owner}/{repo}/stargazers")
+    @GET
     Observable<Result<List<Stargazer>>> getStargazers(@Url String stargazersUrl);
 }
