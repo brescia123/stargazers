@@ -78,6 +78,7 @@ public class StargazersAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
      */
     public void showLoadingFooter(boolean showLoadingMore) {
         showLoadingFooter = showLoadingMore;
+        notifyDataSetChanged();
     }
 
     private static class StargazerViewHolder extends RecyclerView.ViewHolder {

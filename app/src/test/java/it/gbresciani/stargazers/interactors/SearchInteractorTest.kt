@@ -7,8 +7,6 @@ import it.gbresciani.stargazers.interactors.StargazersViewState.*
 import it.gbresciani.stargazers.network.Stargazer
 import it.gbresciani.stargazers.network.StargazersService
 import okhttp3.Headers
-import okhttp3.MediaType
-import okhttp3.ResponseBody
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
@@ -62,24 +60,19 @@ class SearchInteractorTest {
     fun search_emitsCorrectStates_whenASearchIsCompletedWithErrors() {
         val searchInteractor = searchInteactor
 
-        `when`(stargazersServiceMock.getStargazers(user, repo)).thenReturn(Observable.error(Exception()))
+        val exception = Exception()
+        `when`(stargazersServiceMock.getStargazers(user, repo)).thenReturn(Observable.error(exception))
         searchInteactor.
                 search(search)
                 .test()
-                .assertValues(Loading(search), Error(search, "Generic error"))
+                .assertValues(Loading(search), Error(search, exception))
 
-        `when`(stargazersServiceMock.getStargazers(user, repo)).thenReturn(Observable.just(Result.error(Exception())))
+        `when`(stargazersServiceMock.getStargazers(user, repo)).thenReturn(Observable.just(Result.error(exception)))
         searchInteactor
                 .search(search)
                 .test()
-                .assertValues(Loading(search), Error(search, "Generic error"))
+                .assertValues(Loading(search), Error(search, exception))
 
-        val notFoundResponse = Result.response(Response.error<List<Stargazer>>(404, ResponseBody.create(MediaType.parse(""), "")))
-        `when`(stargazersServiceMock.getStargazers(user, repo)).thenReturn(Observable.just(notFoundResponse))
-        searchInteactor
-                .search(search)
-                .test()
-                .assertValues(Loading(search), Error(search, "Not found"))
     }
 
     @Test
@@ -106,13 +99,14 @@ class SearchInteractorTest {
     @Test
     fun loadMoreResults_emitsCorrectPartialStates_whenTheNextPageIsLoadedWithError() {
         `when`(stargazersServiceMock.getStargazers(user, repo)).thenReturn(Observable.just(firstPageResult))
-        `when`(stargazersServiceMock.getStargazers(nextPageUrl)).thenReturn(Observable.error(Exception()))
+        val exception = Exception()
+        `when`(stargazersServiceMock.getStargazers(nextPageUrl)).thenReturn(Observable.error(exception))
 
         searchInteactor.search(search).test()
         searchInteactor
                 .loadMoreResults()
                 .test()
-                .assertValues(NextPageLoading, NextPageError("Generic error"))
+                .assertValues(NextPageLoading, NextPageError(exception))
     }
 
 }
