@@ -1,6 +1,5 @@
 package it.gbresciani.stargazers.ui
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.support.design.widget.AppBarLayout
@@ -21,12 +20,12 @@ import it.gbresciani.stargazers.interactors.StargazersViewState
 import it.gbresciani.stargazers.interactors.StargazersViewState.*
 import kotlinx.android.synthetic.main.activity_stargazers.*
 
-class StargazersActivity : Activity(), StargazersView {
+class StargazersActivity : PresenterActivity<StargazersView, StargazersPresenter>(), StargazersView {
     private lateinit var layoutManager: LinearLayoutManager
     private lateinit var stargazersAdapter: StargazersAdapter
 
     private var title = ""
-    private var presenter: StargazersPresenter? = null
+    override val presenterGenerator: () -> StargazersPresenter = { StargazersPresenter(this, SearchInteractor(StargazersApp.getStargazersService())) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +33,6 @@ class StargazersActivity : Activity(), StargazersView {
         title = getString(R.string.app_name)
         initStargazersRecyclerView()
         initAppBar()
-        presenter = StargazersPresenter(this, SearchInteractor(StargazersApp.getStargazersService()))
     }
 
     private fun initStargazersRecyclerView() {

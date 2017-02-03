@@ -8,27 +8,28 @@ import io.reactivex.schedulers.Schedulers
 import it.gbresciani.stargazers.interactors.PartialStargazersViewState
 import it.gbresciani.stargazers.interactors.SearchInteractor
 import it.gbresciani.stargazers.interactors.StargazersViewState
-import it.gbresciani.stargazers.interactors.StargazersViewState.*
+import it.gbresciani.stargazers.interactors.StargazersViewState.FirstRun
 import it.gbresciani.stargazers.interactors.stargazersViewStateReduce
 
 
 class StargazersPresenter(val view: StargazersView,
                           val searchInteractor: SearchInteractor,
                           val viewScheduler: Scheduler = AndroidSchedulers.mainThread(),
-                          val jobScheduler: Scheduler = Schedulers.io()) {
+                          val jobScheduler: Scheduler = Schedulers.io()) : MVIPresenter<StargazersView>() {
 
     var currentState: StargazersViewState = FirstRun
 
-    init {
+    override fun onAttach(v: StargazersView) {
+        super.onAttach(v)
         val searchObservable: Observable<StargazersViewState> = view.searchIntent()
                 .doOnNext { Log.d("StargazersPresenter", "Intent: search") }
-                .filter { currentState !is Loading }
+                .filter { currentState !is StargazersViewState.Loading }
                 .observeOn(viewScheduler)
                 .flatMap { searchInteractor.search(it).subscribeOn(jobScheduler) }
 
         val loadNextPageObservable = view.loadNextPageIntent()
                 .doOnNext { Log.d("StargazersPresenter", "Intent: loadNextPage") }
-                .filter { currentState !is NextPageIsLoading }
+                .filter { currentState !is StargazersViewState.NextPageIsLoading }
                 .filter { searchInteractor.thereAreMorePages() }
                 .flatMap { searchInteractor.loadMoreResults().subscribeOn(jobScheduler) }
                 .map { reducer(currentState, it) }
@@ -39,6 +40,10 @@ class StargazersPresenter(val view: StargazersView,
                 .doOnNext { Log.d("StargazersPresenter", it.toString()) }
                 .doOnNext { currentState = it }
                 .subscribe({ view.render(it) }, { Log.e("StargazersPresenter", it.message, it) })
+    }
+
+    override fun onDetach() {
+        super.onDetach()
     }
 }
 
