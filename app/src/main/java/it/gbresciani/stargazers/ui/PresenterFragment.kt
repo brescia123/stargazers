@@ -32,6 +32,7 @@ abstract class PresenterFragment<V : View, P : Presenter<V>> : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        @Suppress("UNCHECKED_CAST")
         presenter?.onAttach(this as V)
     }
 

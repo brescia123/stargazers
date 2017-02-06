@@ -1,6 +1,7 @@
 package it.gbresciani.stargazers;
 
 import android.app.Application;
+import android.os.StrictMode;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
@@ -20,6 +21,13 @@ public class StargazersApp extends Application {
     public void onCreate() {
         super.onCreate();
         Fresco.initialize(this);
+        // Enable strict mode in DEBUG to catch common problem
+        StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder().
+                detectLeakedClosableObjects()
+                .detectActivityLeaks()
+                .detectLeakedRegistrationObjects()
+                .penaltyLog()
+                .build());
     }
 
     public static StargazersService getStargazersService() {

@@ -25,7 +25,7 @@ class StargazersActivity : PresenterActivity<StargazersView, StargazersPresenter
     private lateinit var stargazersAdapter: StargazersAdapter
 
     private var title = ""
-    override val presenterGenerator: () -> StargazersPresenter = { StargazersPresenter(this, SearchInteractor(StargazersApp.getStargazersService())) }
+    override val presenterGenerator: () -> StargazersPresenter = { StargazersPresenter(SearchInteractor(StargazersApp.getStargazersService())) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

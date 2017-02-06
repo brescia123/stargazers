@@ -32,6 +32,7 @@ abstract class PresenterActivity<V : View, P : Presenter<V>> : AppCompatActivity
 
     override fun onStart() {
         super.onStart()
+        @Suppress("UNCHECKED_CAST")
         presenter?.onAttach(this as V)
     }
 

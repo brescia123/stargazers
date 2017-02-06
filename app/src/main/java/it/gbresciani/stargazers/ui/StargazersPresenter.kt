@@ -5,46 +5,45 @@ import io.reactivex.Observable
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import it.gbresciani.stargazers.interactors.PartialStargazersViewState
-import it.gbresciani.stargazers.interactors.SearchInteractor
-import it.gbresciani.stargazers.interactors.StargazersViewState
+import it.gbresciani.stargazers.interactors.*
 import it.gbresciani.stargazers.interactors.StargazersViewState.FirstRun
-import it.gbresciani.stargazers.interactors.stargazersViewStateReduce
+import kotlin.reflect.KFunction2
 
 
-class StargazersPresenter(val view: StargazersView,
-                          val searchInteractor: SearchInteractor,
+typealias ViewRender = (ViewState) -> Boolean
+
+class StargazersPresenter(val searchInteractor: SearchInteractor,
                           val viewScheduler: Scheduler = AndroidSchedulers.mainThread(),
-                          val jobScheduler: Scheduler = Schedulers.io()) : MVIPresenter<StargazersView>() {
+                          val jobScheduler: Scheduler = Schedulers.io()) : MVIPresenter<StargazersView, StargazersViewState>() {
 
     var currentState: StargazersViewState = FirstRun
 
-    override fun onAttach(v: StargazersView) {
-        super.onAttach(v)
-        val searchObservable: Observable<StargazersViewState> = view.searchIntent()
+
+    override val viewStateRender: KFunction2<StargazersView, StargazersViewState, Boolean> = StargazersView::render
+
+    override fun bindIntents() : Observable<StargazersViewState>{
+
+        val searchObservable: Observable<StargazersViewState> = intent(StargazersView::searchIntent)
                 .doOnNext { Log.d("StargazersPresenter", "Intent: search") }
                 .filter { currentState !is StargazersViewState.Loading }
                 .observeOn(viewScheduler)
                 .flatMap { searchInteractor.search(it).subscribeOn(jobScheduler) }
 
-        val loadNextPageObservable = view.loadNextPageIntent()
+        val loadNextPageObservable = intent(StargazersView::loadNextPageIntent)
                 .doOnNext { Log.d("StargazersPresenter", "Intent: loadNextPage") }
                 .filter { currentState !is StargazersViewState.NextPageIsLoading }
                 .filter { searchInteractor.thereAreMorePages() }
                 .flatMap { searchInteractor.loadMoreResults().subscribeOn(jobScheduler) }
                 .map { reducer(currentState, it) }
 
-        Observable.merge(searchObservable, loadNextPageObservable)
+        return Observable.merge(searchObservable, loadNextPageObservable)
                 .startWith(currentState)
                 .observeOn(viewScheduler)
                 .doOnNext { Log.d("StargazersPresenter", it.toString()) }
                 .doOnNext { currentState = it }
-                .subscribe({ view.render(it) }, { Log.e("StargazersPresenter", it.message, it) })
     }
 
-    override fun onDetach() {
-        super.onDetach()
-    }
+
 }
 
 fun reducer(previous: StargazersViewState, new: PartialStargazersViewState): StargazersViewState =
